@@ -16,7 +16,7 @@
 
 import { tmpdir } from 'os';
 import { execSync } from 'child_process';
-import { BASE_URL_PREFIX, API_VERSION_STRING } from '../utils/constants';
+import { BASE_URL_PREFIX, API_VERSION_STRING, DEFAULT_DOMAIN } from '../utils/constants';
 import { Logger } from '../utils/logger';
 import { join, resolve, basename, dirname } from 'path';
 import { copyFileSync, mkdtempSync, readdirSync, rmSync, statSync } from 'fs';
@@ -28,7 +28,7 @@ import { UserFriendlyError, throwAsUserFriendlyErrnoException } from '../utils/u
 export const generateUrl = ({
   apiPath,
   realm,
-  domain = 'signalfx.com',
+  domain = DEFAULT_DOMAIN,
 }: {
   apiPath: string;
   realm: string;

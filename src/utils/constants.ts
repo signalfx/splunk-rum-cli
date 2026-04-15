@@ -23,6 +23,10 @@ export const API_VERSION_STRING = 'v2';
 export const BASE_URL_PREFIX = 'https://api';
 export const TOKEN_HEADER = 'X-SF-Token';
 
+// Domain Constants
+export const DEFAULT_DOMAIN = 'observability.splunkcloud.com';
+export const LEGACY_DOMAIN = 'signalfx.com';
+
 // Android-Specific Constants
 export const ANDROID_CONSTANTS = {
   PATH_FOR_UPLOAD: 'rum-mfm/proguard',

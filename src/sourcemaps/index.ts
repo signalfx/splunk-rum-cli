@@ -23,7 +23,8 @@ import {
 import {
   BASE_URL_PREFIX,
   API_VERSION_STRING,
-  SOURCEMAPS_CONSTANTS
+  SOURCEMAPS_CONSTANTS,
+  DEFAULT_DOMAIN
 } from '../utils/constants';
 import { throwAsUserFriendlyErrnoException } from '../utils/userFriendlyErrors';
 import { discoverJsMapFilePath } from './discoverJsMapFilePath';
@@ -243,7 +244,7 @@ export async function runSourcemapUpload(options: SourceMapUploadOptions, ctx: S
 }
 
 function getSourceMapUploadUrl(realm: string, idPathParam: string): string {
-  const API_BASE_URL = `${BASE_URL_PREFIX}.${realm}.signalfx.com`;
+  const API_BASE_URL = `${BASE_URL_PREFIX}.${realm}.${DEFAULT_DOMAIN}`;
   const PATH_FOR_SOURCEMAPS = SOURCEMAPS_CONSTANTS.PATH_FOR_UPLOAD;
   return `${API_BASE_URL}/${API_VERSION_STRING}/${PATH_FOR_SOURCEMAPS}/id/${idPathParam}`;
 }

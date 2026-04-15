@@ -28,7 +28,8 @@ import {
 import {
   BASE_URL_PREFIX,
   API_VERSION_STRING,
-  ANDROID_CONSTANTS
+  ANDROID_CONSTANTS,
+  DEFAULT_DOMAIN
 } from '../utils/constants';
 import { UserFriendlyError } from '../utils/userFriendlyErrors';
 import { createLogger, LogLevel } from '../utils/logger';
@@ -42,7 +43,7 @@ import { attachApiInterceptor } from '../utils/apiInterceptor';
 export const androidCommand = new Command('android');
 
 const generateURL = (type: 'upload' | 'list', realm: string, appId: string, versionCode?: string, splunkBuildId?: string): string => {
-  const baseUrl = `${BASE_URL_PREFIX}.${realm}.signalfx.com/${API_VERSION_STRING}/${ANDROID_CONSTANTS.PATH_FOR_UPLOAD}`;
+  const baseUrl = `${BASE_URL_PREFIX}.${realm}.${DEFAULT_DOMAIN}/${API_VERSION_STRING}/${ANDROID_CONSTANTS.PATH_FOR_UPLOAD}`;
 
   if (type === 'upload') {
     if (!versionCode) throw new Error('Version code is required for uploading.');
