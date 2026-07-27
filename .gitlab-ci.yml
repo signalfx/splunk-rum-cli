@@ -13,7 +13,7 @@ include:
     ref: master
     file: '/prodsec/.oss-scan.yml'
   - project: 'ci-cd/templates'
-    ref: master
+    ref: main
     file: '/prodsec/.sast-scan.yml'
 
 stages:
