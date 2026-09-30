@@ -21,22 +21,16 @@ import {
   isJsMapFilePath
 } from './utils';
 import {
-  BASE_URL_PREFIX,
-  API_VERSION_STRING,
-  SOURCEMAPS_CONSTANTS,
-  DEFAULT_DOMAIN
-} from '../utils/constants';
+  getSourceMapUploadUrl,
+  uploadSourceMap
+} from './uploadSourceMap';
 import { throwAsUserFriendlyErrnoException } from '../utils/userFriendlyErrors';
 import { discoverJsMapFilePath } from './discoverJsMapFilePath';
 import { computeSourceMapId } from './computeSourceMapId';
 import { injectFile } from './injectFile';
 import { Logger } from '../utils/logger';
 import { Spinner } from '../utils/spinner';
-import { uploadFile } from '../utils/httpUtils';
-import axios from 'axios';
-import { formatUploadProgress } from '../utils/stringUtils';
 import { wasInjectAlreadyRun } from './wasInjectAlreadyRun';
-import { attachApiInterceptor } from '../utils/apiInterceptor';
 
 export type SourceMapInjectOptions = {
   directory: string;
@@ -176,25 +170,11 @@ export async function runSourcemapUpload(options: SourceMapUploadOptions, ctx: S
     const filesRemaining = jsMapFilePaths.length - i;
     const path = jsMapFilePaths[i];
     const sourceMapId = await computeSourceMapId(path, { directory });
-    const url = getSourceMapUploadUrl(realm, sourceMapId);
-    const file = {
-      filePath: path,
-      fieldName: 'file'
-    };
-
     const parameters = Object.fromEntries([
       ['appName', appName],
       ['appVersion', appVersion],
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ].filter(([_, value]) => typeof value !== 'undefined'));
-
-    logger.debug('Uploading %s', path);
-    logger.debug('PUT', url);
-
-    const dryRunUploadFile: typeof uploadFile = async () => {
-      logger.info('sourceMapId %s would be used to upload %s', sourceMapId, path);
-    };
-    const uploadFileFn = options.dryRun ? dryRunUploadFile : uploadFile;
 
     // notify user if we cannot be certain the "sourcemaps inject" command was already run
     const alreadyInjected = await wasInjectAlreadyRun(path, logger);
@@ -204,20 +184,16 @@ export async function runSourcemapUpload(options: SourceMapUploadOptions, ctx: S
 
     // upload a single file
     try {
-      const axiosInstance = axios.create();
-      attachApiInterceptor(axiosInstance, logger, url, {
-        userFriendlyMessage: 'An error occurred during source map upload.'
-      });
-      await uploadFileFn({
-        url,
-        file,
+      await uploadSourceMap({
+        sourceMapPath: path,
+        sourceMapId,
+        realm,
         token,
-        onProgress: ({ loaded, total }) => {
-          const { totalFormatted } = formatUploadProgress(loaded, total);
-          spinner.updateText(`Uploading ${path} | ${totalFormatted} | ${filesRemaining} file(s) remaining`);
-        },
-        parameters,
-      }, axiosInstance);
+        metadata: parameters,
+        dryRun: options.dryRun,
+        progressText: totalFormatted =>
+          `Uploading ${path} | ${totalFormatted} | ${filesRemaining} file(s) remaining`,
+      }, ctx);
       success++;
     } catch (e) {
       spinner.stop();
@@ -241,12 +217,6 @@ export async function runSourcemapUpload(options: SourceMapUploadOptions, ctx: S
       exclude
     });
   }
-}
-
-function getSourceMapUploadUrl(realm: string, idPathParam: string): string {
-  const API_BASE_URL = `${BASE_URL_PREFIX}.${realm}.${DEFAULT_DOMAIN}`;
-  const PATH_FOR_SOURCEMAPS = SOURCEMAPS_CONSTANTS.PATH_FOR_UPLOAD;
-  return `${API_BASE_URL}/${API_VERSION_STRING}/${PATH_FOR_SOURCEMAPS}/id/${idPathParam}`;
 }
 
 function throwDirectoryReadErrorDuringInject(err: unknown, directory: string): never {
