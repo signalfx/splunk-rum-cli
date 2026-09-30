@@ -1,0 +1,14 @@
+{
+  "bundles": [
+    {
+      "bundleName": "index.android.bundle",
+      "bundle": "final-hermes.bundle",
+      "sourceMap": "final-hermes.bundle.map"
+    },
+    {
+      "bundleName": "features/payments.android.bundle",
+      "bundle": "final-jsc.jsbundle",
+      "sourceMap": "final-jsc.jsbundle.map"
+    }
+  ]
+}

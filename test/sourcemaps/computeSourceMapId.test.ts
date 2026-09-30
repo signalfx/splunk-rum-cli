@@ -16,7 +16,11 @@
 
 import * as filesystem from '../../src/utils/filesystem';
 import { Readable } from 'node:stream';
-import { computeSourceMapId } from '../../src/sourcemaps/computeSourceMapId';
+import {
+  computeFileSha256,
+  computeSourceMapId,
+  sha256ToSourceMapId
+} from '../../src/sourcemaps/computeSourceMapId';
 import { UserFriendlyError } from '../../src/utils/userFriendlyErrors';
 import { SourceMapInjectOptions } from '../../src/sourcemaps';
 import * as fs from 'fs';
@@ -36,15 +40,46 @@ describe('computeSourceMapId', () => {
     mockReadStream.push('line 2\n');
     mockReadStream.push(null);
 
-    jest.spyOn(filesystem, 'makeReadStream').mockReturnValue(mockReadStream);
+    jest.spyOn(filesystem, 'makeBinaryReadStream').mockReturnValue(mockReadStream);
     const sourceMapId = await computeSourceMapId('file.js.map', opts);
     expect(sourceMapId).toBe('90605548-63a6-2b9d-b5f7-26216876654e');
   });
 
   test('should throw UserFriendlyError when file operations fail due to known error code', async () => {
-    jest.spyOn(filesystem, 'makeReadStream').mockImplementation(() => throwErrnoException('EACCES'));
+    jest.spyOn(filesystem, 'makeBinaryReadStream').mockImplementation(() => throwErrnoException('EACCES'));
 
     await expect(computeSourceMapId('file.js.map', opts)).rejects.toThrowError(UserFriendlyError);
+  });
+
+  test('should expose the complete SHA-256 and derive the compatible sourceMapId', async () => {
+    const mockReadStream = new Readable() as unknown as fs.ReadStream;
+    mockReadStream.path = 'file.js.map';
+    mockReadStream.bytesRead = 0;
+    mockReadStream.close = jest.fn();
+    mockReadStream._read = jest.fn();
+    mockReadStream.push('line 1\n');
+    mockReadStream.push('line 2\n');
+    mockReadStream.push(null);
+
+    jest.spyOn(filesystem, 'makeBinaryReadStream').mockReturnValue(mockReadStream);
+    const sha256 = await computeFileSha256('file.js.map');
+
+    expect(sha256).toBe('9060554863a62b9db5f726216876654e561896071d2e6480f2048b70e0fdadb9');
+    expect(sha256ToSourceMapId(sha256)).toBe('90605548-63a6-2b9d-b5f7-26216876654e');
+  });
+
+  test('hashes binary Hermes bundles as exact bytes rather than UTF-8 text', async () => {
+    const binary = Buffer.from([0xc6, 0x1f, 0xbc, 0x03, 0xff, 0xfe, 0x00, 0x80]);
+    const mockReadStream = Readable.from([binary]) as unknown as fs.ReadStream;
+    jest.spyOn(filesystem, 'makeBinaryReadStream').mockReturnValue(mockReadStream);
+
+    await expect(computeFileSha256('index.android.bundle')).resolves.toBe(
+      '220ed65d1b20be1bd4316c0aefe6869069a12fa5af4bd082ca9fddddcd879b63'
+    );
+  });
+
+  test('should reject an incomplete SHA-256', () => {
+    expect(() => sha256ToSourceMapId('1234')).toThrow(/64 hexadecimal/);
   });
 });
 

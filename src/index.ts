@@ -22,12 +22,13 @@ import { Command } from 'commander';
 import { iOSCommand } from './commands/ios';
 import { androidCommand } from './commands/android';
 import { sourcemapsCommand } from './commands/sourcemaps';
+import { reactNativeCommand } from './commands/reactNative';
 import * as packageJson from '../package.json';
 
 const program = new Command();
 
 const helpDescription =
-`The Splunk RUM CLI is a tool for uploading and displaying of Android, iOS, and Browser symbolication files to and from Splunk Observability Cloud.
+`The Splunk RUM CLI is a tool for uploading Android, iOS, Browser, and React Native symbolication files to Splunk Observability Cloud.
 
 For each respective command listed below under 'Commands', please run 'splunk-rum <command>' for an overview of available subcommands and options.
 
@@ -43,5 +44,6 @@ program
 program.addCommand(iOSCommand);
 program.addCommand(androidCommand);
 program.addCommand(sourcemapsCommand);
+program.addCommand(reactNativeCommand);
 
 program.parseAsync(process.argv);

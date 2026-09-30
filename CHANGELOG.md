@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Added
+
+- Added `react-native sourcemaps upload` for explicit Hermes and JSC bundle/map
+  validation, content-derived source-map upload, and versioned runtime manifest
+  generation without browser bundle injection.
+
 ## Version 1.0.1
 
 ### Changed

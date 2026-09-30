@@ -60,6 +60,10 @@ export function makeReadStream(filePath: string) {
   return createReadStream(filePath, { encoding: 'utf-8' });
 }
 
+export function makeBinaryReadStream(filePath: string) {
+  return createReadStream(filePath);
+}
+
 /**
  * Safely overwrite the contents of filePath by writing to a temporary
  * file and replacing filePath. This avoids destructive edits to filePath

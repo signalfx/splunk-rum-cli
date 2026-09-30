@@ -16,7 +16,7 @@
 
 import { SourceMapInjectOptions } from './index';
 import { createHash } from 'node:crypto';
-import { makeReadStream } from '../utils/filesystem';
+import { makeBinaryReadStream } from '../utils/filesystem';
 import { throwJsMapFileReadError } from './utils';
 
 /**
@@ -24,22 +24,27 @@ import { throwJsMapFileReadError } from './utils';
  * formatting the hash to like a GUID.
  */
 export async function computeSourceMapId(sourceMapFilePath: string, options: SourceMapInjectOptions): Promise<string> {
-  const hash = createHash('sha256').setEncoding('hex');
-
   try {
-    const fileStream = makeReadStream(sourceMapFilePath);
-    for await (const chunk of fileStream) {
-      hash.update(chunk);
-    }
+    const sha = await computeFileSha256(sourceMapFilePath);
+    return sha256ToSourceMapId(sha);
   } catch (e) {
     throwJsMapFileReadError(e, sourceMapFilePath, options);
   }
-
-  const sha = hash.digest('hex');
-  return shaToSourceMapId(sha);
 }
 
-function shaToSourceMapId(sha: string) {
+export async function computeFileSha256(filePath: string): Promise<string> {
+  const hash = createHash('sha256');
+  const fileStream = makeBinaryReadStream(filePath);
+  for await (const chunk of fileStream) {
+    hash.update(chunk);
+  }
+  return hash.digest('hex');
+}
+
+export function sha256ToSourceMapId(sha: string) {
+  if (!/^[a-f0-9]{64}$/i.test(sha)) {
+    throw new Error('Expected a complete SHA-256 digest containing 64 hexadecimal characters.');
+  }
   return [
     sha.slice(0, 8),
     sha.slice(8, 12),
