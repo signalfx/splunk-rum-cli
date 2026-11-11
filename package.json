@@ -42,7 +42,7 @@
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2.9.0",
     "@types/jest": "^29.5.14",
-    "@types/node": "^20.17.0",
+    "@types/node": "^22.20.5",
     "@types/xml2js": "^0.4.14",
     "@typescript-eslint/eslint-plugin": "^8.14.0",
     "@typescript-eslint/parser": "^8.14.0",
