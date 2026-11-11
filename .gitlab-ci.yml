@@ -1,5 +1,5 @@
 default:
-  image: 'cimg/node:22.23.4'
+  image: 'cimg/node:24.22'
 
 cache:
   key:

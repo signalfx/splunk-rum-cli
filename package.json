@@ -28,7 +28,7 @@
   "author": "Splunk <splunk-oss@splunk.com>",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=18"
+    "node": ">=22.23.5"
   },
   "dependencies": {
     "axios": "^1.20.0",
