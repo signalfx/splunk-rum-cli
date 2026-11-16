@@ -35,7 +35,7 @@
     "chalk": "^4.1.2",
     "commander": "^12.1.0",
     "form-data": "^4.0.1",
-    "glob": "^11.1.0",
+    "glob": "^14.0.5",
     "ora": "^5.4.1",
     "xml2js": "^0.6.2"
   },
@@ -55,5 +55,10 @@
   },
   "bin": {
     "splunk-rum": "dist/index.js"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree@8.64.0": {
+      "minimatch": "^11.0.1"
+    }
   }
 }
